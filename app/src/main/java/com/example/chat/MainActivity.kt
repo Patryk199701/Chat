@@ -1,17 +1,26 @@
 package com.example.chat
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
+import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+
+    lateinit var recyclerView: RecyclerView
+    private var nick: String? = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +39,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+
+
+        /*
+        val sharedPref = getSharedPreferences("log", Context.MODE_PRIVATE) ?: return
+        userLogin = sharedPref.getString("login", null )
+        if(userLogin == null) {
+
+        }
+
+
+    */
+
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+
+
     }
+
+
+    override fun onResume() {
+        super.onResume()
+        val sharedPref = getSharedPreferences("log", Context.MODE_PRIVATE) ?: return
+        var userLogin = sharedPref.getString("login", null )
+        var test : TextView = findViewById(R.id.test)
+        test.text = userLogin
+        nick = userLogin.toString()
+
+    }
+
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
@@ -59,24 +96,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_camera -> {
-                // Handle the camera action
-            }
-            R.id.nav_gallery -> {
 
-            }
-            R.id.nav_slideshow -> {
-
-            }
             R.id.nav_manage -> {
-
+                val intent = Intent(this, LoginActivity::class.java)
+                startActivity(intent)
             }
-            R.id.nav_share -> {
 
-            }
-            R.id.nav_send -> {
-
-            }
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
