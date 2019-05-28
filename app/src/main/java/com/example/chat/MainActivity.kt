@@ -8,11 +8,15 @@ import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
+import retrofit2.*
 import android.widget.EditText
+import retrofit2.Call
 import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import org.w3c.dom.Text
@@ -20,6 +24,7 @@ import org.w3c.dom.Text
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     lateinit var recyclerView: RecyclerView
+    lateinit var recyclerAdapter: RecyclerAdapter
     private var nick: String? = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,11 +32,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        /*
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
-
+*/
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
@@ -50,20 +56,41 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     */
-
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
+        recyclerView = findViewById(R.id.recyclerView)
+        recyclerAdapter = RecyclerAdapter { item -> itemClicked(item)}
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = recyclerAdapter
 
-
+        /*
+        getNewMessages()
+        //send button listener
+        send_button.setOnClickListener{
+            sendNewMessage(input_message.text.toString())
+            input_message.text.clear()
+            input_message.clearFocus()
+            it.hideKeyboard()
+        }
+    */
     }
 
+    private fun itemClicked(Item : Message) {
+        Toast.makeText(this, "Clicked: ${Item.id}", Toast.LENGTH_LONG).show()
+        val intent = Intent(this, EditMessageAcitivty::class.java)
+        intent.putExtra("login", Item.login)
+        intent.putExtra("content", Item.content)
+        intent.putExtra("id", Item.id)
+        intent.putExtra("user_login", nick)
+        startActivityForResult(intent, 1)
+    }
 
     override fun onResume() {
         super.onResume()
         val sharedPref = getSharedPreferences("log", Context.MODE_PRIVATE) ?: return
         var userLogin = sharedPref.getString("login", null )
-        var test : TextView = findViewById(R.id.test)
-        test.text = userLogin
+
+
         nick = userLogin.toString()
 
     }
@@ -103,8 +130,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
 
         }
-
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
+
+    fun getNewMessages(){
+
+        val service = Service.create()
+        val call = service.getMessages()
+
+
+        call.enqueue(object : Callback<MutableList<Message>>{
+            override fun onResponse(call: Call<MutableList<Message>>, response: Response<MutableList<Message>>) {
+                if(response.code() == 200){
+                    recyclerAdapter.setMessageListItems(response.body()!!)
+                }
+            }
+
+            override fun onFailure(call: Call<MutableList<Message>>, t: Throwable) {
+                t.printStackTrace()
+            }
+        })
+    }
 }
+

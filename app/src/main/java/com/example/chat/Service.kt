@@ -10,8 +10,7 @@ import retrofit2.http.POST
 
 interface Service {
     @GET("messages")
-
-    fun getMessages(): Call<List<Message>>
+    fun getMessages(): Call<MutableList<Message>>
 
     @POST("message")
     fun sendMessage(@Body b: SendMessage): Call<Message>
